@@ -1,0 +1,13 @@
+faixa_temp_min,faixa_temp_max,umidade_min,umidade_max,classificacao,efeito
+-50,15,0,29,Seca,"Desconforto respiratório leve, menor risco de mofo"
+-50,15,30,59,Confortável,"Boa sensação térmica, especialmente em locais fechados"
+-50,15,60,80,Moderada,"Sensação úmida e fria, possível desconforto leve"
+-50,15,81,100,Alta,"Pode causar sensação de frio úmido, formação de mofo"
+16,25,0,29,Baixa,"Ar seco, aumenta risco de irritações e doenças respiratórias"
+16,25,30,59,Moderada,Leve ressecamento em pessoas sensíveis
+16,25,60,80,Confortável,Faixa ideal para conforto térmico e saúde
+16,25,81,100,Muito Alta,"Sensação de abafamento, risco de mofo e ácaros"
+26,100,0,29,Seca,Pode causar desidratação e irritação das vias aéreas
+26,100,30,59,Confortável,Boa sensação térmica dependendo da ventilação
+26,100,60,80,Alta,"Quente e úmido, pode causar fadiga"
+26,100,81,100,Excessiva,"Sensação pegajosa, desconforto térmico acentuado"
