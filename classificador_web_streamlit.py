@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 
@@ -7,17 +6,23 @@ import pandas as pd
 def carregar_faixas(path="faixas_umidade.csv"):
     return pd.read_csv(path)
 
-def classificar_umidade_csv(temperatura, umidade, df):
+def classificar_umidade(temperatura, umidade, df):
     for _, row in df.iterrows():
         if (row['faixa_temp_min'] <= temperatura <= row['faixa_temp_max'] and
             row['umidade_min'] <= umidade <= row['umidade_max']):
-            faixa_ideal = (row['umidade_min'], row['umidade_max'])
-            return row['classificacao'], row['efeito'], faixa_ideal
-    return "Desconhecida", "Faixa não encontrada.", (None, None)
+            return row['classificacao'], row['efeito']
+    return "Desconhecida", "Faixa não encontrada."
+
+def buscar_faixa_ideal(temperatura, df):
+    for _, row in df.iterrows():
+        if (row['faixa_temp_min'] <= temperatura <= row['faixa_temp_max'] and
+            row['classificacao'] == "Confortável"):
+            return (row['umidade_min'], row['umidade_max'])
+    return (None, None)
 
 def gerar_dica(umidade, faixa_ideal):
     if faixa_ideal == (None, None):
-        return "Não foi possível gerar dica. Faixa não encontrada."
+        return "Não foi possível gerar dica. Faixa ideal não encontrada."
     ideal_min, ideal_max = faixa_ideal
     if umidade > ideal_max:
         return "Considere usar um desumidificador, manter o ambiente ventilado ou utilizar ar-condicionado com função desumidificação."
@@ -36,7 +41,8 @@ umidade = st.number_input("Umidade Relativa (%)", min_value=0.0, max_value=100.0
 df_faixas = carregar_faixas()
 
 if st.button("Classificar"):
-    classificacao, efeito, faixa_ideal = classificar_umidade_csv(temperatura, umidade, df_faixas)
+    classificacao, efeito = classificar_umidade(temperatura, umidade, df_faixas)
+    faixa_ideal = buscar_faixa_ideal(temperatura, df_faixas)
     dica = gerar_dica(umidade, faixa_ideal)
 
     faixa_formatada = f"{faixa_ideal[0]}–{faixa_ideal[1]}%" if faixa_ideal != (None, None) else "-"
