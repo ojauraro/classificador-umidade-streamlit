@@ -1,39 +1,23 @@
 
 import streamlit as st
+import pandas as pd
 
-def classificar_umidade(temperatura, umidade):
-    if temperatura <= 15:
-        faixa_ideal = (30, 60)
-        if umidade > 80:
-            return "Alta", "Pode causar sensação de frio úmido, formação de mofo", faixa_ideal
-        elif 60 <= umidade <= 80:
-            return "Moderada", "Sensação úmida e fria, possível desconforto leve", faixa_ideal
-        elif 30 <= umidade < 60:
-            return "Confortável", "Boa sensação térmica, especialmente em locais fechados", faixa_ideal
-        else:
-            return "Seca", "Desconforto respiratório leve, menor risco de mofo", faixa_ideal
-    elif 16 <= temperatura <= 25:
-        faixa_ideal = (60, 80)
-        if umidade > 80:
-            return "Muito Alta", "Sensação de abafamento, risco de mofo e ácaros", faixa_ideal
-        elif 60 <= umidade <= 80:
-            return "Confortável", "Faixa ideal para conforto térmico e saúde", faixa_ideal
-        elif 30 <= umidade < 60:
-            return "Moderada", "Leve ressecamento em pessoas sensíveis", faixa_ideal
-        else:
-            return "Baixa", "Ar seco, aumenta risco de irritações e doenças respiratórias", faixa_ideal
-    else:
-        faixa_ideal = (30, 60)
-        if umidade > 80:
-            return "Excessiva", "Sensação pegajosa, desconforto térmico acentuado", faixa_ideal
-        elif 60 <= umidade <= 80:
-            return "Alta", "Quente e úmido, pode causar fadiga", faixa_ideal
-        elif 30 <= umidade < 60:
-            return "Confortável", "Boa sensação térmica dependendo da ventilação", faixa_ideal
-        else:
-            return "Seca", "Pode causar desidratação e irritação das vias aéreas", faixa_ideal
+# Carregar faixas de umidade do CSV
+@st.cache_data
+def carregar_faixas(path="faixas_umidade.csv"):
+    return pd.read_csv(path)
+
+def classificar_umidade_csv(temperatura, umidade, df):
+    for _, row in df.iterrows():
+        if (row['faixa_temp_min'] <= temperatura <= row['faixa_temp_max'] and
+            row['umidade_min'] <= umidade <= row['umidade_max']):
+            faixa_ideal = (row['umidade_min'], row['umidade_max'])
+            return row['classificacao'], row['efeito'], faixa_ideal
+    return "Desconhecida", "Faixa não encontrada.", (None, None)
 
 def gerar_dica(umidade, faixa_ideal):
+    if faixa_ideal == (None, None):
+        return "Não foi possível gerar dica. Faixa não encontrada."
     ideal_min, ideal_max = faixa_ideal
     if umidade > ideal_max:
         return "Considere usar um desumidificador, manter o ambiente ventilado ou utilizar ar-condicionado com função desumidificação."
@@ -42,17 +26,20 @@ def gerar_dica(umidade, faixa_ideal):
     else:
         return "A umidade está dentro da faixa ideal para essa temperatura."
 
-st.title("Classificador de Umidade Relativa x Temperatura")
+# Interface Streamlit
+st.title("Classificador de Umidade Relativa x Temperatura (com CSV)")
 st.write("Insira os dados abaixo para ver a classificação, efeitos e dicas.")
 
 temperatura = st.number_input("Temperatura (°C)", min_value=-10.0, max_value=50.0, step=0.5)
 umidade = st.number_input("Umidade Relativa (%)", min_value=0.0, max_value=100.0, step=1.0)
 
+df_faixas = carregar_faixas()
+
 if st.button("Classificar"):
-    classificacao, efeito, faixa_ideal = classificar_umidade(temperatura, umidade)
+    classificacao, efeito, faixa_ideal = classificar_umidade_csv(temperatura, umidade, df_faixas)
     dica = gerar_dica(umidade, faixa_ideal)
 
-    faixa_formatada = f"{faixa_ideal[0]}–{faixa_ideal[1]}%"
+    faixa_formatada = f"{faixa_ideal[0]}–{faixa_ideal[1]}%" if faixa_ideal != (None, None) else "-"
     st.markdown(f"### Classificação: **{classificacao}**")
     st.markdown(f"**Efeitos prováveis:** {efeito}")
     st.markdown(f"**Faixa ideal de umidade para {temperatura:.1f} °C:** {faixa_formatada}")
