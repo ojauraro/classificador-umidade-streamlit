@@ -12,7 +12,7 @@ streamlit run classificador_web_streamlit_v3.py
 ## Como publicar no Streamlit Cloud
 
 1. Crie um repositório no GitHub e envie estes arquivos:
-   - `classificador_web_streamlit_v3.py`
+   - `classificador_web_streamlit.py`
    - `requirements.txt`
    - `README.md`
 2. Acesse https://streamlit.io/cloud
